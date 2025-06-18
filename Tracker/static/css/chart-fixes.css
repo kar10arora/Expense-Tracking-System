@@ -1,0 +1,238 @@
+/* Chart styling and fixes - STATIC SIZES */
+.chart-container {
+    position: relative;
+    height: 400px !important;
+    width: 100% !important;
+    min-height: 400px !important;
+    max-height: 400px !important;
+}
+
+.chart-container canvas {
+    height: 400px !important;
+    width: 100% !important;
+    max-height: 400px !important;
+    min-height: 400px !important;
+}
+
+/* Ensure charts don't resize unexpectedly */
+.chart-wrapper {
+    position: relative;
+    width: 100% !important;
+    height: 400px !important;
+    min-height: 400px !important;
+    max-height: 400px !important;
+    overflow: hidden;
+}
+
+.chart-wrapper canvas {
+    height: 400px !important;
+    width: 100% !important;
+    max-height: 400px !important;
+    min-height: 400px !important;
+}
+
+/* Fixed chart dimensions for dashboard */
+.dashboard-chart {
+    height: 400px !important;
+    width: 100% !important;
+    min-height: 400px !important;
+    max-height: 400px !important;
+}
+
+.dashboard-chart canvas {
+    height: 400px !important;
+    width: 100% !important;
+    max-height: 400px !important;
+    min-height: 400px !important;
+}
+
+/* Fixed chart dimensions for reports */
+.reports-chart {
+    height: 400px !important;
+    width: 100% !important;
+    min-height: 400px !important;
+    max-height: 400px !important;
+}
+
+.reports-chart canvas {
+    height: 400px !important;
+    width: 100% !important;
+    max-height: 400px !important;
+    min-height: 400px !important;
+}
+
+/* Prevent any size changes during updates */
+.chart-wrapper *,
+.dashboard-chart *,
+.reports-chart * {
+    box-sizing: border-box !important;
+}
+
+/* Force static dimensions on all chart elements */
+#barChart,
+#pieChart,
+#categoryChart {
+    height: 400px !important;
+    width: 100% !important;
+    max-height: 400px !important;
+    min-height: 400px !important;
+    max-width: 100% !important;
+    min-width: 100% !important;
+    display: block !important;
+    position: relative !important;
+}
+
+/* Prevent Chart.js from changing canvas size */
+.chartjs-render-monitor {
+    height: 400px !important;
+    width: 100% !important;
+    max-height: 400px !important;
+    min-height: 400px !important;
+}
+
+/* Responsive chart adjustments - but maintain fixed height */
+@media (max-width: 768px) {
+    .chart-container,
+    .chart-wrapper,
+    .dashboard-chart,
+    .reports-chart {
+        height: 350px !important;
+        min-height: 350px !important;
+        max-height: 350px !important;
+    }
+    
+    .chart-container canvas,
+    .chart-wrapper canvas,
+    .dashboard-chart canvas,
+    .reports-chart canvas,
+    #barChart,
+    #pieChart,
+    #categoryChart {
+        height: 350px !important;
+        min-height: 350px !important;
+        max-height: 350px !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .chart-container,
+    .chart-wrapper,
+    .dashboard-chart,
+    .reports-chart {
+        height: 300px !important;
+        min-height: 300px !important;
+        max-height: 300px !important;
+    }
+    
+    .chart-container canvas,
+    .chart-wrapper canvas,
+    .dashboard-chart canvas,
+    .reports-chart canvas,
+    #barChart,
+    #pieChart,
+    #categoryChart {
+        height: 300px !important;
+        min-height: 300px !important;
+        max-height: 300px !important;
+    }
+}
+
+/* Chart loading states */
+.chart-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 400px !important;
+    min-height: 400px !important;
+    max-height: 400px !important;
+    background-color: #f9fafb;
+    border-radius: 8px;
+}
+
+.chart-loading::after {
+    content: "Loading chart data...";
+    color: #6b7280;
+    font-size: 14px;
+}
+
+/* Chart error states */
+.chart-error {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 400px !important;
+    min-height: 400px !important;
+    max-height: 400px !important;
+    background-color: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 8px;
+    color: #dc2626;
+    font-size: 14px;
+}
+
+/* Chart tooltip improvements */
+.chartjs-tooltip {
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    border-radius: 4px;
+    padding: 8px 12px;
+    font-size: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Chart legend improvements */
+.chartjs-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 16px;
+    justify-content: center;
+}
+
+.chartjs-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    color: #374151;
+}
+
+.chartjs-legend-color {
+    width: 12px;
+    height: 12px;
+    border-radius: 2px;
+}
+
+/* Animation for chart updates */
+.chart-update {
+    transition: opacity 0.3s ease-in-out;
+}
+
+.chart-update.updating {
+    opacity: 0.7;
+}
+
+/* Print styles for charts */
+@media print {
+    .chart-container,
+    .chart-wrapper,
+    .dashboard-chart,
+    .reports-chart {
+        page-break-inside: avoid;
+        height: 300px !important;
+        min-height: 300px !important;
+        max-height: 300px !important;
+    }
+    
+    .chart-container canvas,
+    .chart-wrapper canvas,
+    .dashboard-chart canvas,
+    .reports-chart canvas,
+    #barChart,
+    #pieChart,
+    #categoryChart {
+        height: 300px !important;
+        min-height: 300px !important;
+        max-height: 300px !important;
+    }
+} 
