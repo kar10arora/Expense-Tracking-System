@@ -1,11 +1,19 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="h-full">
 <head>
   <meta charset="UTF-8" />
   <title>Auth | Team Expense Tracker</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <script src="https://cdn.tailwindcss.com"></script>
+  <meta name="color-scheme" content="light dark" />
+  <link href="{% static 'css/tailwind.min.css' %}" rel="stylesheet" />
+  <link href="https://fonts.cdnfonts.com/css/mona-sans" rel="stylesheet" />
+  <style>
+    :root { --brand:#075131; }
+    body { font-family: 'Mona-Sans', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Apple Color Emoji', 'Segoe UI Emoji'; }
+    .brand-bg { background-color: var(--brand); }
+    .brand-bg-hover:hover { background-color: #06412a; }
+  </style>
   <script>
     function toggleForm() {
       const loginForm = document.getElementById("loginForm");
@@ -15,89 +23,111 @@
     }
   </script>
 </head>
-<body class="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 min-h-screen flex items-center justify-center px-4 text-gray-100 font-sans">
+<body class="min-h-screen h-full bg-gray-100 dark:bg-gray-900 flex items-center justify-center px-4 text-gray-900 dark:text-gray-100">
+
+  <!-- Toast Messages -->
+  {% if messages %}
+  <div class="fixed top-6 right-6 z-50 space-y-2">
+    {% for message in messages %}
+      <div class="flex items-center gap-3 px-4 py-3 rounded-lg shadow-lg text-sm font-medium
+                  {% if message.tags == 'error' %}bg-red-600 text-white
+                  {% elif message.tags == 'success' %}bg-green-600 text-white
+                  {% else %}bg-gray-700 text-white{% endif %}">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          {% if message.tags == 'error' %}
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          {% elif message.tags == 'success' %}
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+          {% else %}
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M12 20h.01" />
+          {% endif %}
+        </svg>
+        <span>{{ message }}</span>
+      </div>
+    {% endfor %}
+  </div>
+  <script>
+    setTimeout(() => {
+      document.querySelectorAll('.fixed.top-6.right-6.z-50')?.forEach(el => el.remove());
+    }, 4000);
+  </script>
+  {% endif %}
 
   <!-- Auth Container -->
-  <div class="w-full max-w-5xl flex bg-gray-900 shadow-xl rounded-2xl overflow-hidden ring-1 ring-gray-700">
+  <div class="w-full max-w-5xl flex bg-white dark:bg-gray-900 shadow-2xl rounded-2xl overflow-hidden ring-1 ring-gray-200 dark:ring-gray-700">
 
     <!-- Left Panel -->
-    <div class="hidden md:flex w-1/2 flex-col justify-center items-center bg-gray-800 p-10">
-      <h1 class="text-4xl font-bold text-white mb-3">Team Expense Tracker</h1>
-      <p class="text-center text-gray-400">Track, analyze, and manage your team's expenses with clarity and control.</p>
+    <div class="hidden md:flex w-1/2 flex-col justify-center items-center p-10" style="background-color: var(--brand);">
+      <h1 class="text-4xl text-center font-bold text-white mb-3">Team Expense Tracker</h1>
+      <p class="text-center text-white">Track, analyze, and manage your team's expenses with clarity and control.</p>
     </div>
 
     <!-- Right Panel: Forms -->
-    <div class="w-full md:w-1/2 bg-gray-800 p-10 text-gray-200 rounded-l-none rounded-r-2xl">
+    <div class="w-full md:w-1/2 bg-white dark:bg-gray-800 p-10 text-gray-900 dark:text-gray-200 rounded-l-none rounded-r-2xl">
 
       <!-- Login Form -->
-      <form method="POST" action="{% url 'login' %}" id="loginForm" class="space-y-5 {% if not login_error %}hidden{% endif %}">
+      <form method="POST" action="{% url 'login' %}" id="loginForm" class="space-y-5 {% if show_register %}hidden{% endif %}">
         {% csrf_token %}
-        <h2 class="text-2xl font-semibold text-center text-white">Sign In</h2>
+        <h2 class="text-2xl font-semibold text-center">Sign In</h2>
         <div>
-          <label class="block text-sm mb-1">Username</label>
-          <input name="username" type="text" required class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded focus:ring-2 focus:ring-indigo-500 text-white" />
+          <label class="block text-sm mb-1">Email Address</label>
+          <input name="email" type="email" required class="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded focus:ring-2 focus:ring-indigo-500" />
         </div>
         <div>
           <label class="block text-sm mb-1">Password</label>
-          <input name="password" type="password" required class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded focus:ring-2 focus:ring-indigo-500 text-white" />
+          <input name="password" type="password" required class="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded focus:ring-2 focus:ring-indigo-500" />
         </div>
-        <button type="submit" class="w-full bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700 font-medium">
+        <button type="submit" class="w-full brand-bg brand-bg-hover text-white py-2 rounded font-medium focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">
           Log In
         </button>
         <p class="text-xs text-center text-gray-400 mt-3">
-          Don’t have an account?
-          <button type="button" onclick="toggleForm()" class="text-indigo-400 font-medium hover:underline">Register here</button>
+          Don't have an account?
+          <button type="button" onclick="toggleForm()" class="brand-text font-medium hover:underline">Register here</button>
         </p>
       </form>
 
       <!-- Register Form -->
-      <form method="POST" action="{% url 'login' %}" id="registerForm" class="space-y-5 {% if login_error %}hidden{% endif %}">
+     <form method="POST" action="{% url 'register' %}" id="registerForm" class="space-y-5 {% if not show_register %}hidden{% endif %}">
         {% csrf_token %}
-        <h2 class="text-2xl font-semibold text-center text-white">Create Account</h2>
+        <h2 class="text-2xl font-semibold text-center">Create Account</h2>
         <div>
-          <label class="block text-sm mb-1">Username</label>
-          <input name="username" type="text" required class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded focus:ring-2 focus:ring-green-500 text-white" />
+          <label class="block text-sm mb-1">First Name</label>
+          <input name="first_name" type="text" required value="{{ form_data.first_name|default:'' }}" class="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded focus:ring-2 focus:ring-green-500" />
+        </div>
+        <div>
+          <label class="block text-sm mb-1">Last Name</label>
+          <input name="last_name" type="text" required value="{{ form_data.last_name|default:'' }}" class="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded focus:ring-2 focus:ring-green-500" />
         </div>
         <div>
           <label class="block text-sm mb-1">Email</label>
-          <input name="email" type="email" required class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded focus:ring-2 focus:ring-green-500 text-white" />
+          <input name="email" type="email" required value="{{ form_data.email|default:'' }}" class="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded focus:ring-2 focus:ring-green-500" />
         </div>
         <div>
           <label class="block text-sm mb-1">Password</label>
-          <input name="password1" type="password" required class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded focus:ring-2 focus:ring-green-500 text-white" />
+          <input name="password1" type="password" required class="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded focus:ring-2 focus:ring-green-500" />
         </div>
         <div>
           <label class="block text-sm mb-1">Confirm Password</label>
-          <input name="password2" type="password" required class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded focus:ring-2 focus:ring-green-500 text-white" />
+          <input name="password2" type="password" required class="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded focus:ring-2 focus:ring-green-500" />
         </div>
         <div>
           <label class="block text-sm mb-1">Select Role</label>
-          <select name="role" required class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded focus:ring-2 focus:ring-green-500 text-white">
+          <select name="role" required class="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded focus:ring-2 focus:ring-green-500">
             <option value="">-- Choose Role --</option>
-            <option value="Admin">Admin</option>
-            <option value="Custom Admin">Custom Admin</option>
-            <option value="Team Member">Team Member</option>
-            <option value="Finance Officer">Finance Officer</option>
+            <option value="Admin" {% if form_data.role == 'Admin' %}selected{% endif %}>Admin</option>
+            <option value="Custom Admin" {% if form_data.role == 'Custom Admin' %}selected{% endif %}>Custom Admin</option>
+            <option value="Team Member" {% if form_data.role == 'Team Member' %}selected{% endif %}>Team Member</option>
+            <option value="Finance Officer" {% if form_data.role == 'Finance Officer' %}selected{% endif %}>Finance Officer</option>
           </select>
         </div>
-        <button type="submit" class="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700 font-medium">
+        <button type="submit" class="w-full brand-bg brand-bg-hover text-white py-2 rounded font-medium focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">
           Register
         </button>
         <p class="text-xs text-center text-gray-400 mt-3">
           Already have an account?
-          <button type="button" onclick="toggleForm()" class="text-indigo-400 font-medium hover:underline">Log In here</button>
+          <button type="button" onclick="toggleForm()" class="brand-text font-medium hover:underline">Log In here</button>
         </p>
       </form>
-
-      {% if registered %}
-      <script>
-        setTimeout(() => {
-          alert("✅ Successfully Registered!\nClick OK to go to Login.");
-          document.getElementById("registerForm").classList.add("hidden");
-          document.getElementById("loginForm").classList.remove("hidden");
-        }, 200);
-      </script>
-      {% endif %}
     </div>
   </div>
 

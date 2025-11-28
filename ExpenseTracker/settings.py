@@ -9,7 +9,11 @@ SECRET_KEY = 'django-insecure-d*#8-=^lt1n3&kw01s0657g0z1+2pgy8@(np6-!ad#8@8h(mgz
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
+# Allow all hosts for offline development
+ALLOWED_HOSTS = ['*']
+
+# Custom user model
+AUTH_USER_MODEL = 'Tracker.CustomUser'
 
 # Application definition
 INSTALLED_APPS = [
@@ -52,7 +56,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'ExpenseTracker.wsgi.application'
 
-# Database (SQLite for development)
+# Database (SQLite for local dev)
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -70,7 +74,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # Internationalization
 LANGUAGE_CODE = 'en-us'
-TIME_ZONE = 'Asia/Kolkata'
+TIME_ZONE = 'UTC'  # Or change to 'Asia/Kolkata' if you're in India
 USE_I18N = True
 USE_TZ = True
 
@@ -80,22 +84,32 @@ STATICFILES_DIRS = [
     BASE_DIR / 'Tracker' / 'static',
 ]
 
-# Default primary key field type
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Media files
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
 
 # Authentication redirect URLs
 LOGIN_URL = '/'
 LOGIN_REDIRECT_URL = '/dashboard/'
 LOGOUT_REDIRECT_URL = '/'
 
-# Session Settings (Session-based Auth)
-SESSION_COOKIE_SECURE = False  # Set True in production (HTTPS)
-SESSION_COOKIE_HTTPONLY = True
-SESSION_EXPIRE_AT_BROWSER_CLOSE = True
-SESSION_COOKIE_AGE = 1800  # 30 minutes session expiry
+# Default primary key field type
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# CSRF Protection
-CSRF_COOKIE_SECURE = False  # Set True in production (HTTPS)
+# SESSION SETTINGS for offline development
+SESSION_COOKIE_SECURE = False                 # Don't require HTTPS
+SESSION_COOKIE_HTTPONLY = True                # Prevent JavaScript access
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False       # Persist sessions across browser restarts
+SESSION_COOKIE_AGE = 60 * 60 * 24 * 14         # 14 days session lifespan
 
-# HTTPS settings (Disable while developing locally)
-SECURE_SSL_REDIRECT = False  # Set True in production
+# CSRF Protection (adjust for production)
+CSRF_COOKIE_SECURE = False
+
+# Disable forced HTTPS for local use
+SECURE_SSL_REDIRECT = False
+
+# X-Forwarded headers (not needed offline)
+USE_X_FORWARDED_HOST = False
+USE_X_FORWARDED_PORT = False
+

@@ -1,111 +1,188 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="h-full" data-theme="light">
 <head>
   <meta charset="UTF-8" />
-  <title>Dashboard | Team Expense Tracker</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <meta name="color-scheme" content="light dark" />
+  <title>Dashboard | Team Expense Tracker</title>
+  <link href="{% static 'css/tailwind.min.css' %}" rel="stylesheet" />
   <link rel="stylesheet" href="{% static 'css/chart-fixes.css' %}">
+  <script src="{% static 'js/chart.min.js' %}"></script>
+  <link href="https://fonts.cdnfonts.com/css/mona-sans" rel="stylesheet" />
+  <style>
+    :root { --brand:#075131; }
+    body { font-family: 'Mona-Sans', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Apple Color Emoji', 'Segoe UI Emoji'; }
+    .brand-bg { background-color: var(--brand); }
+    .brand-bg-hover:hover { background-color: #06412a; }
+    .brand-text { color: var(--brand); }
+    .brand-border { border-color: var(--brand); }
+  </style>
 </head>
-<body class="bg-gray-100 min-h-screen font-sans">
+<body class="min-h-screen h-full bg-gray-50 text-gray-900 dark:bg-gray-900 dark:text-gray-100 antialiased">
 
   <!-- Navbar -->
-  <nav class="bg-white shadow-md p-4 px-6 flex justify-between items-center text-black">
-    <div class="flex items-center gap-2">
-      <svg class="w-6 h-6 text-black" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-        <path d="M9 17v-2a4 4 0 014-4h5a4 4 0 014 4v2"></path>
-        <path d="M3 7a4 4 0 014-4h10a4 4 0 014 4v10a4 4 0 01-4 4H7a4 4 0 01-4-4V7z"></path>
-      </svg>
-      <span class="text-xl font-bold tracking-wide">Team Expense Tracker</span>
-    </div>
-    <div class="flex items-center space-x-6">
-      <span class="font-medium">👤 {{ request.user.username }}</span>
-      <form method="post" action="{% url 'logout' %}">
-        {% csrf_token %}
-        <button type="submit" class="bg-white text-indigo-700 font-semibold px-4 py-2 rounded-lg hover:bg-indigo-100 transition">
-          Logout
+  <nav id="appHeader" class="sticky top-0 z-50 bg-white/90 backdrop-blur border-b border-gray-200 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="h-16 flex items-center justify-between">
+        <button id="sidebarToggle" class="lg:hidden inline-flex items-center justify-center h-9 w-9 rounded-lg border border-gray-300 bg-white text-gray-700 mr-2">
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
         </button>
-      </form>
+        <a href="{% url 'dashboard' %}" class="flex items-center gap-3 group">
+          <span class="inline-flex h-9 w-9 items-center justify-center rounded-lg brand-bg text-white shadow-sm group-hover:shadow transition">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M9 17v-2a4 4 0 014-4h5a4 4 0 014 4v2" />
+              <path d="M3 7a4 4 0 014-4h10a4 4 0 014 4v10a4 4 0 01-4 4H7a4 4 0 01-4-4V7z" />
+            </svg>
+          </span>
+          <span class="text-lg font-semibold tracking-tight">Team Expense Tracker</span>
+        </a>
+        <div class="flex items-center gap-3">
+          <!-- <button id="themeToggle" type="button" class="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition" aria-pressed="false" aria-label="Toggle dark mode">
+            <span class="hidden sm:inline">Theme</span>
+            <svg id="themeIcon" class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3a1 1 0 011 1v2a1 1 0 11-2 0V4a1 1 0 011-1zm0 14a4 4 0 100-8 4 4 0 000 8zm7-5a1 1 0 110-2h2a1 1 0 110 2h-2zM3 12a1 1 0 100-2H1a1 1 0 100 2h2zm15.364 6.364a1 1 0 10-1.414-1.414l-1.415 1.414a1 1 0 101.415 1.415l1.414-1.415zM7.05 7.05A1 1 0 108.465 5.636L7.05 4.222A1 1 0 105.636 5.636L7.05 7.05zm0 9.9l-1.414 1.414A1 1 0 106.05 19.78L7.464 18.364A1 1 0 107.05 16.95z"/></svg>
+          </button> -->
+          <span class="hidden sm:block text-sm font-medium">👤 {{ request.user.first_name }}</span>
+          <form method="post" action="{% url 'logout' %}">
+            {% csrf_token %}
+            <button type="submit" class="inline-flex items-center rounded-lg brand-bg brand-bg-hover text-white px-4 py-2 text-sm font-semibold shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-800 transition" aria-label="Logout">
+              Logout
+            </button>
+          </form>
+        </div>
+      </div>
     </div>
   </nav>
 
   <div class="flex">
     <!-- Sidebar -->
-    <aside class="w-64 min-h-screen bg-gray-900 text-white shadow-lg p-6 hidden md:block">
-  <div class="mb-10">
-    <h2 class="text-2xl font-bold mb-1">Welcome</h2>
-    <p class="text-sm text-gray-400">{{ request.user.username }}</p>
-  </div>
-  <nav class="space-y-4 text-sm">
-    <a href="{% url 'dashboard' %}" class="flex items-center gap-2 px-4 py-2 rounded-lg {% if request.resolver_match.url_name == 'dashboard' %}bg-white bg-opacity-10{% endif %} hover:bg-white hover:bg-opacity-20 transition">
-      <span>📊</span> Dashboard
-    </a>
-    <a href="{% url 'add_expense' %}" class="flex items-center gap-2 px-4 py-2 rounded-lg {% if request.resolver_match.url_name == 'add_expense' %}bg-white bg-opacity-10{% endif %} hover:bg-white hover:bg-opacity-20 transition">
-      <span>➕</span> Add Expense
-    </a>
-    <a href="{% url 'reports' %}" class="flex items-center gap-2 px-4 py-2 rounded-lg {% if request.resolver_match.url_name == 'reports' %}bg-white bg-opacity-10{% endif %} hover:bg-white hover:bg-opacity-20 transition">
-      <span>📈</span> Reports
-    </a>
-    <a href="{% url 'my_submissions' %}" class="flex items-center gap-2 px-4 py-2 rounded-lg {% if request.resolver_match.url_name == 'my_submissions' %}bg-white bg-opacity-10{% endif %} hover:bg-white hover:bg-opacity-20 transition">
-      <span>📁</span> My Submissions
-    </a>
-    <form method="post" action="{% url 'logout' %}">
-      {% csrf_token %}
-      <button type="submit" class="w-full text-left flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-white hover:bg-opacity-20 text-red-300 hover:text-white transition">
-        <span>🚪</span> Logout
-      </button>
-    </form>
-  </nav>
-</aside>
+    <aside id="sidebar" class="hidden lg:block w-64 min-h-[calc(100vh-4rem)] text-white shadow-lg" style="background-color: var(--brand);">
+      <div class="p-6">
+        <!-- <div class="mb-8">
+          <h2 class="text-xl font-semibold">Welcome</h2>
+          <p class="text-sm text-gray-400">{{ request.user.first_name }}</p>
+        </div> -->
+        <nav class="space-y-2 text-sm">
+          <a href="{% url 'dashboard' %}" class="flex items-center gap-2 px-4 py-3 w-full rounded-lg border border-white/30 transition {% if request.resolver_match.url_name == 'dashboard' %}bg-white text-green-700 font-medium{% else %}hover:bg-white/10 text-white/90{% endif %}">
+            <span>📊</span> Dashboard
+          </a>
+          <a href="{% url 'add_expense' %}" class="flex items-center gap-2 px-4 py-3 w-full rounded-lg border border-white/30 transition {% if request.resolver_match.url_name == 'add_expense' %}bg-white text-green-700 font-medium{% else %}hover:bg-white/10 text-white/90{% endif %}">
+            <span>➕</span> Add Expense
+          </a>
+          <a href="{% url 'reports' %}" class="flex items-center gap-2 px-4 py-3 w-full rounded-lg border border-white/30 transition {% if request.resolver_match.url_name == 'reports' %}bg-white text-green-700 font-medium{% else %}hover:bg-white/10 text-white/90{% endif %}">
+            <span>📈</span> Reports
+          </a>
+          <a href="{% url 'my_submissions' %}" class="flex items-center gap-2 px-4 py-3 w-full rounded-lg border border-white/30 transition {% if request.resolver_match.url_name == 'my_submissions' %}bg-white text-green-700 font-medium{% else %}hover:bg-white/10 text-white/90{% endif %}">
+            <span>📁</span> My Submissions
+          </a>
+          <a href="{% url 'invoice_generator' %}" class="flex items-center gap-2 px-4 py-3 w-full rounded-lg border border-white/30 transition {% if request.resolver_match.url_name == 'invoice_generator' %}bg-white text-green-700 font-medium{% else %}hover:bg-white/10 text-white/90{% endif %}">
+            <span>🧾</span> Invoice Generator
+          </a>
+        </nav>
+      </div>
+    </aside>
 
     <!-- Main Content -->
-    <main class="flex-1 p-6">
-      <div class="mb-6">
-        <h1 class="text-3xl font-bold text-gray-800 mb-2">Welcome, {{ request.user.username }} 👋</h1>
-        <p class="text-gray-600">Here's a summary of your expenses.</p>
-      </div>
-
-      <!-- Dashboard Cards -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-        <a href="{% url 'add_expense' %}" class="bg-indigo-100 p-6 rounded-xl shadow hover:shadow-lg transition transform hover:-translate-y-1 text-center">
-          <h2 class="text-xl font-semibold text-indigo-700 mb-2">Add Expense</h2>
-          <p class="text-sm text-gray-600">Log a new expense item.</p>
-        </a>
-        <a href="{% url 'reports' %}" class="bg-green-100 p-6 rounded-xl shadow hover:shadow-lg transition transform hover:-translate-y-1 text-center">
-          <h2 class="text-xl font-semibold text-green-700 mb-2">View Reports</h2>
-          <p class="text-sm text-gray-600">Analyze spending data.</p>
-        </a>
-        <a href="{% url 'my_submissions' %}" class="bg-blue-100 p-6 rounded-xl shadow hover:shadow-lg transition transform hover:-translate-y-1 text-center">
-          <h2 class="text-xl font-semibold text-blue-700 mb-2">See Submissions</h2>
-          <p class="text-sm text-gray-600">View submitted entries.</p>
-        </a>
-      </div>
-
-      <!-- Charts Side by Side -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <!-- Bar Chart -->
-        <div class="bg-white p-6 rounded-xl shadow">
-          <h3 class="text-xl font-semibold text-gray-800 mb-4">Monthly Expenses (Bar Chart)</h3>
-          <div class="chart-wrapper dashboard-chart">
-            <canvas id="barChart" width="400" height="350"></canvas>
-          </div>
+    <main class="flex-1">
+      <div class="max-w-7xl mx-auto p-6 lg:p-10">
+        <div class="mb-6">
+          <h1 class="text-3xl font-bold tracking-tight">Welcome, {{ request.user.first_name }}</h1>
+          <p class="mt-1 text-gray-600 dark:text-gray-300">Here is a summary of your expenses.</p>
         </div>
 
-        <!-- Pie Chart -->
-        <div class="bg-white p-6 rounded-xl shadow">
-          <h3 class="text-xl font-semibold text-gray-800 mb-4">Expenses by Category (Pie Chart)</h3>
-          <div class="chart-wrapper dashboard-chart">
-            <canvas id="pieChart" width="400" height="350"></canvas>
+        <!-- Dashboard Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
+          <a href="{% url 'add_expense' %}" class="group relative overflow-hidden rounded-xl bg-white p-6 shadow ring-1 ring-gray-200 hover:shadow-lg transition">
+            <h2 class="text-lg font-semibold brand-text">Add Expense</h2>
+            <p class="text-sm text-gray-600">Log a new expense item.</p>
+            <span class="pointer-events-none absolute -right-6 -bottom-6 h-24 w-24 rounded-full bg-indigo-200/70 dark:bg-indigo-700/40 blur-2xl"></span>
+          </a>
+          <a href="{% url 'reports' %}" class="group relative overflow-hidden rounded-xl bg-white p-6 shadow ring-1 ring-gray-200 hover:shadow-lg transition">
+            <h2 class="text-lg font-semibold brand-text">View Reports</h2>
+            <p class="text-sm text-gray-600">Analyze spending data.</p>
+            <span class="pointer-events-none absolute -right-6 -bottom-6 h-24 w-24 rounded-full bg-emerald-200/70 dark:bg-emerald-700/40 blur-2xl"></span>
+          </a>
+          <a href="{% url 'my_submissions' %}" class="group relative overflow-hidden rounded-xl bg-white p-6 shadow ring-1 ring-gray-200 hover:shadow-lg transition">
+            <h2 class="text-lg font-semibold brand-text">See Submissions</h2>
+            <p class="text-sm text-gray-600">View submitted entries.</p>
+            <span class="pointer-events-none absolute -right-6 -bottom-6 h-24 w-24 rounded-full bg-sky-200/70 dark:bg-sky-700/40 blur-2xl"></span>
+          </a>
+        </div>
+
+        <!-- Charts Side by Side -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- Bar Chart -->
+          <div class="rounded-xl bg-white dark:bg-gray-800 p-5 shadow ring-1 ring-gray-200 dark:ring-white/10">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-base font-semibold">Expenses (Bar Chart)</h3>
+              <select id="periodSelect" class="rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-2 py-1 text-sm focus:outline-none">
+                <option value="daily" selected>Daily (This Month)</option>
+                <option value="monthly">Monthly (This Year)</option>
+              </select>
+            </div>
+            <div class="chart-wrapper dashboard-chart">
+              <canvas id="barChart" width="400" height="350"></canvas>
+            </div>
+          </div>
+
+          <!-- Pie Chart -->
+          <div class="rounded-xl bg-white dark:bg-gray-800 p-5 shadow ring-1 ring-gray-200 dark:ring-white/10">
+            <h3 class="text-base font-semibold mb-4">Expenses by Category (Pie Chart)</h3>
+            <div class="chart-wrapper dashboard-chart">
+              <canvas id="pieChart" width="400" height="350"></canvas>
+            </div>
           </div>
         </div>
       </div>
     </main>
   </div>
 
-  <!-- Load external JavaScript -->
+  <!-- Scripts -->
   <script src="{% static 'js/charts.js' %}"></script>
+  <script>
+    (function() {
+      const root = document.documentElement;
+      const stored = localStorage.getItem('theme');
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const isDark = stored ? stored === 'dark' : prefersDark;
+      root.classList.toggle('dark', isDark);
+      window.addEventListener('DOMContentLoaded', function() {
+        const btn = document.getElementById('themeToggle');
+        if (!btn) return;
+        btn.setAttribute('aria-pressed', String(root.classList.contains('dark')));
+        btn.addEventListener('click', function() {
+          const nowDark = !root.classList.contains('dark');
+          root.classList.toggle('dark', nowDark);
+          localStorage.setItem('theme', nowDark ? 'dark' : 'light');
+          this.setAttribute('aria-pressed', String(nowDark));
+        });
+      });
+    })();
+
+    // Header background on scroll
+    (function() {
+      const header = document.getElementById('appHeader');
+      const onScroll = () => {
+        if (window.scrollY > 10) {
+          header.classList.add('bg-white','shadow-md');
+        } else {
+          header.classList.remove('bg-white','shadow-md');
+        }
+      };
+      window.addEventListener('scroll', onScroll, { passive: true });
+      onScroll();
+    })();
+
+    // Sidebar toggle (mobile)
+    (function() {
+      const toggle = document.getElementById('sidebarToggle');
+      const sidebar = document.getElementById('sidebar');
+      if (!toggle || !sidebar) return;
+      toggle.addEventListener('click', () => {
+        sidebar.classList.toggle('hidden');
+      });
+    })();
+  </script>
 
 </body>
 </html>

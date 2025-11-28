@@ -1,102 +1,141 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="h-full">
 <head>
   <meta charset="UTF-8" />
-  <title>Reports | Team Expense Tracker</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <meta name="color-scheme" content="light dark" />
+  <title>Reports | Team Expense Tracker</title>
+  <link href="{% static 'css/tailwind.min.css' %}" rel="stylesheet" />
   <link rel="stylesheet" href="{% static 'css/chart-fixes.css' %}">
+  <script src="{% static 'js/chart.min.js' %}"></script>
+  <link href="https://fonts.cdnfonts.com/css/mona-sans" rel="stylesheet" />
+  <style>
+    :root { --brand:#075131; }
+    body { font-family: 'Mona-Sans', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Apple Color Emoji', 'Segoe UI Emoji'; }
+    .brand-bg { background-color: var(--brand); }
+    .brand-bg-hover:hover { background-color: #06412a; }
+    .brand-text { color: var(--brand); }
+  </style>
 </head>
-<body class="bg-gray-100 min-h-screen font-sans">
+<body class="min-h-screen h-full bg-gray-50 text-gray-900 dark:bg-gray-900 dark:text-gray-100 antialiased">
 
   <!-- Navbar -->
-  <nav class="bg-white shadow-md p-4 px-6 flex justify-between items-center text-black">
-    <div class="flex items-center gap-2">
-      <svg class="w-6 h-6 text-black" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-        <path d="M9 17v-2a4 4 0 014-4h5a4 4 0 014 4v2"></path>
-        <path d="M3 7a4 4 0 014-4h10a4 4 0 014 4v10a4 4 0 01-4 4H7a4 4 0 01-4-4V7z"></path>
-      </svg>
-      <span class="text-xl font-bold tracking-wide">Team Expense Tracker</span>
-    </div>
-    <div class="flex items-center space-x-6">
-      <span class="font-medium">👤 {{ request.user.username }}</span>
-      <form method="post" action="{% url 'logout' %}">
-        {% csrf_token %}
-        <button type="submit" class="bg-white text-indigo-700 font-semibold px-4 py-2 rounded-lg hover:bg-indigo-100 transition">
-          Logout
-        </button>
-      </form>
+  <nav id="appHeader" class="sticky top-0 z-50 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="h-16 flex items-center justify-between">
+        <a href="{% url 'dashboard' %}" class="flex items-center gap-3">
+          <span class="inline-flex h-9 w-9 items-center justify-center rounded-lg brand-bg text-white shadow-sm">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M9 17v-2a4 4 0 014-4h5a4 4 0 014 4v2" />
+              <path d="M3 7a4 4 0 014-4h10a4 4 0 014 4v10a4 4 0 01-4 4H7a4 4 0 01-4-4V7z" />
+            </svg>
+          </span>
+          <span class="text-lg font-semibold tracking-tight">Team Expense Tracker</span>
+        </a>
+        <div class="flex items-center gap-3">
+          <span class="hidden sm:block text-sm font-medium">👤 {{ request.user.first_name }}</span>
+          <form method="post" action="{% url 'logout' %}">
+            {% csrf_token %}
+            <button type="submit" class="inline-flex items-center rounded-lg brand-bg brand-bg-hover text-white px-4 py-2 text-sm font-semibold shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-800 transition" aria-label="Logout">
+              Logout
+            </button>
+          </form>
+        </div>
+      </div>
     </div>
   </nav>
 
   <div class="flex">
     <!-- Sidebar -->
-    <aside class="w-64 min-h-screen bg-gray-900 text-white shadow-lg p-6 hidden md:block">
-      <div class="mb-10">
-        <h2 class="text-2xl font-bold mb-1">Welcome</h2>
-        <p class="text-sm text-gray-400">{{ request.user.username }}</p>
+    <aside class="hidden lg:block w-64 min-h-[calc(100vh-4rem)] text-white shadow-lg" style="background-color: var(--brand);">
+      <div class="p-6">
+        
+        <nav class="space-y-2 text-sm">
+          <a href="{% url 'dashboard' %}" class="flex items-center gap-2 px-4 py-3 w-full rounded-lg border border-white/30 transition {% if request.resolver_match.url_name == 'dashboard' %}bg-white text-green-700 font-medium{% else %}hover:bg-white/10 text-white/90{% endif %}"><span>📊</span> Dashboard</a>
+          <a href="{% url 'add_expense' %}" class="flex items-center gap-2 px-4 py-3 w-full rounded-lg border border-white/30 transition {% if request.resolver_match.url_name == 'add_expense' %}bg-white text-green-700 font-medium{% else %}hover:bg-white/10 text-white/90{% endif %}"><span>➕</span> Add Expense</a>
+          <a href="{% url 'reports' %}" class="flex items-center gap-2 px-4 py-3 w-full rounded-lg border border-white/30 transition {% if request.resolver_match.url_name == 'reports' %}bg-white text-green-700 font-medium{% else %}hover:bg-white/10 text-white/90{% endif %}"><span>📈</span> Reports</a>
+          <a href="{% url 'my_submissions' %}" class="flex items-center gap-2 px-4 py-3 w-full rounded-lg border border-white/30 transition {% if request.resolver_match.url_name == 'my_submissions' %}bg-white text-green-700 font-medium{% else %}hover:bg-white/10 text-white/90{% endif %}"><span>📁</span> My Submissions</a>
+          <a href="{% url 'invoice_generator' %}" class="flex items-center gap-2 px-4 py-3 w-full rounded-lg border border-white/30 transition {% if request.resolver_match.url_name == 'my_submissions' %}bg-white text-green-700 font-medium{% else %}hover:bg-white/10 text-white/90{% endif %}">🧾 Invoice Generator</a>
+
+        </nav>
       </div>
-      <nav class="space-y-4 text-sm">
-        <a href="{% url 'dashboard' %}" class="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-white hover:bg-opacity-20 transition">
-          <span>📊</span> Dashboard
-        </a>
-        <a href="{% url 'add_expense' %}" class="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-white hover:bg-opacity-20 transition">
-          <span>➕</span> Add Expense
-        </a>
-        <a href="{% url 'reports' %}" class="flex items-center gap-2 px-4 py-2 rounded-lg bg-white bg-opacity-10 hover:bg-opacity-20 transition">
-          <span>📈</span> Reports
-        </a>
-        <a href="{% url 'my_submissions' %}" class="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-white hover:bg-opacity-20 transition">
-          <span>📁</span> My Submissions
-        </a>
-        <form method="post" action="{% url 'logout' %}">
-          {% csrf_token %}
-          <button type="submit" class="w-full text-left flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-white hover:bg-opacity-20 text-red-300 hover:text-white transition">
-            <span>🚪</span> Logout
-          </button>
-        </form>
-      </nav>
     </aside>
 
     <!-- Main Content -->
-    <main class="flex-1 p-6">
-      <h2 class="text-3xl font-bold text-indigo-700 mb-12">Expense Reports</h2>
+    <main class="flex-1">
+      <div class="max-w-7xl mx-auto p-6 lg:p-10">
+        <h2 class="text-3xl font-bold tracking-tight brand-text mb-8">Expense Reports</h2>
 
-      <form method="post" class="mb-8">
-        {% csrf_token %}
-        <label class="block text-sm font-medium text-gray-700 mb-2">Select Report Range</label>
-        <select name="range" id="rangeSelect" class="w-full px-4 py-2 border rounded-md bg-white mb-4">
-          <option value="daily">Daily</option>
-          <option value="weekly">Weekly</option>
-          <option value="quarterly">Quarterly</option>
-          <option value="half_yearly">Half-Yearly</option>
-          <option value="yearly">Yearly</option>
-        </select>
+        <form method="post" class="mb-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-end">
+          {% csrf_token %}
+          <div>
+            <label for="rangeSelect" class="block text-sm font-medium mb-1">Select Report Range</label>
+            <select name="range" id="rangeSelect" class="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+              <option value="daily">Daily</option>
+              <option value="weekly">Weekly</option>
+              <option value="quarterly">Quarterly</option>
+              <option value="half_yearly">Half-Yearly</option>
+              <option value="yearly">Yearly</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">Download Format</label>
+            <select name="format" class="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+              <option value="html">View On Page</option>
+              <option value="pdf">Download PDF</option>
+              <option value="excel">Download Excel</option>
+            </select>
+          </div>
+          <div>
+            <button type="submit" class="w-full sm:w-auto inline-flex items-center justify-center rounded-lg brand-bg brand-bg-hover px-5 py-2.5 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-offset-2 transition">Generate Report</button>
+          </div>
+        </form>
 
-        <label class="block text-sm font-medium text-gray-700 mb-2">Download Format</label>
-        <select name="format" class="w-full px-4 py-2 border rounded-md bg-white mb-4">
-          <option value="html">View On Page</option>
-          <option value="pdf">Download PDF</option>
-          <option value="excel">Download Excel</option>
-        </select>
-
-        <button type="submit" class="px-6 py-2 bg-indigo-600 text-white font-semibold rounded hover:bg-indigo-700 transition">
-          Generate Report
-        </button>
-      </form>
-
-      <div class="mt-8">
-        <h3 class="text-xl font-semibold text-gray-800 mb-3">Expenses by Category</h3>
-        <div class="chart-wrapper reports-chart">
-          <canvas id="categoryChart" width="400" height="400"></canvas>
+        <div class="mt-6 rounded-xl bg-white dark:bg-gray-800 p-5 shadow ring-1 ring-gray-900/5 dark:ring-white/10">
+          <h3 class="text-base font-semibold mb-4">Expenses by Category</h3>
+          <div class="chart-wrapper reports-chart">
+            <canvas id="categoryChart" width="400" height="400"></canvas>
+          </div>
         </div>
       </div>
     </main>
   </div>
 
-  <!-- Charts JS -->
   <script src="{% static 'js/charts.js' %}"></script>
+  <script>
+    (function() {
+      const root = document.documentElement;
+      const stored = localStorage.getItem('theme');
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const isDark = stored ? stored === 'dark' : prefersDark;
+      root.classList.toggle('dark', isDark);
+      window.addEventListener('DOMContentLoaded', function() {
+        const btn = document.getElementById('themeToggle');
+        if (!btn) return;
+        btn.setAttribute('aria-pressed', String(root.classList.contains('dark')));
+        btn.addEventListener('click', function() {
+          const nowDark = !root.classList.contains('dark');
+          root.classList.toggle('dark', nowDark);
+          localStorage.setItem('theme', nowDark ? 'dark' : 'light');
+          this.setAttribute('aria-pressed', String(nowDark));
+        });
+      });
+    })();
+    
+    // Header background on scroll
+    (function() {
+      const header = document.getElementById('appHeader');
+      const onScroll = () => {
+        if (window.scrollY > 10) {
+          header.classList.add('bg-white','shadow-md');
+        } else {
+          header.classList.remove('bg-white','shadow-md');
+        }
+      };
+      window.addEventListener('scroll', onScroll, { passive: true });
+      onScroll();
+    })();
+  </script>
 </body>
 </html>

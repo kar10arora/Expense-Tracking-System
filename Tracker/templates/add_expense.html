@@ -1,93 +1,116 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="h-full">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Submit Expense | Team Expense Tracker</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-  <script src="https://unpkg.com/feather-icons"></script>
+  <meta name="color-scheme" content="light dark" />
+  <link href="{% static 'css/tailwind.min.css' %}" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  <link href="https://fonts.cdnfonts.com/css/mona-sans" rel="stylesheet" />
+  <style>
+    .animate-fade-in-down { animation: fadeInDown 0.4s ease-out; }
+    @keyframes fadeInDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+    :root { --brand:#075131; }
+    body { font-family: 'Mona-Sans', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Apple Color Emoji', 'Segoe UI Emoji'; }
+    .brand-bg { background-color: var(--brand); }
+    .brand-bg-hover:hover { background-color: #06412a; }
+    .brand-text { color: var(--brand); }
+    
+    /* Recording button states */
+    .record-btn.recording {
+      background-color: #16a34a !important;
+      animation: pulse 1.5s infinite;
+    }
+    .record-btn.processing {
+      background-color: #f59e0b !important;
+      cursor: wait;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.6; }
+    }
+  </style>
 </head>
-<body class="bg-gray-100 text-gray-900 font-sans">
+<body class="min-h-screen h-full bg-gray-50 text-gray-900 dark:bg-gray-900 dark:text-gray-100 antialiased">
 
-  <!-- Navbar -->
-  <nav class="bg-white shadow-md p-4 px-6 flex justify-between items-center text-black">
-    <div class="flex items-center gap-2">
-      <svg class="w-6 h-6 text-black" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-        <path d="M9 17v-2a4 4 0 014-4h5a4 4 0 014 4v2"></path>
-        <path d="M3 7a4 4 0 014-4h10a4 4 0 014 4v10a4 4 0 01-4 4H7a4 4 0 01-4-4V7z"></path>
-      </svg>
-      <span class="text-xl font-bold tracking-wide">Team Expense Tracker</span>
+  {% if submitted %}
+  <div id="toast" class="fixed top-6 right-6 z-50">
+    <div class="bg-green-100 border border-green-400 text-green-800 px-6 py-4 rounded-lg shadow-md flex items-center space-x-3 animate-fade-in-down">
+      <span>Expense added successfully.</span>
     </div>
-    <div class="flex items-center space-x-6">
-      <span class="font-medium">👤 {{ request.user.username }}</span>
-      <form method="post" action="{% url 'logout' %}">
-        {% csrf_token %}
-        <button type="submit" class="bg-white text-indigo-700 font-semibold px-4 py-2 rounded-lg hover:bg-indigo-100 transition">
-          Logout
-        </button>
-      </form>
+  </div>
+  <script>setTimeout(() => { document.getElementById('toast')?.remove(); }, 3000);</script>
+  {% endif %}
+
+  <nav id="appHeader" class="sticky top-0 z-50 bg-white dark:bg-gray-800 backdrop-blur border-b border-gray-200 dark:border-gray-700">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="h-16 flex items-center justify-between">
+        <a href="{% url 'dashboard' %}" class="flex items-center gap-3 group">
+          <span class="inline-flex h-9 w-9 items-center justify-center rounded-lg brand-bg text-white shadow-sm">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 17v-2a4 4 0 014-4h5a4 4 0 014 4v2" /><path d="M3 7a4 4 0 014-4h10a4 4 0 014 4v10a4 4 0 01-4 4H7a4 4 0 01-4-4V7z" /></svg>
+          </span>
+          <span class="text-lg font-semibold tracking-tight">Team Expense Tracker</span>
+        </a>
+        <div class="flex items-center gap-3">
+          <span class="hidden sm:block text-sm font-medium">👤 {{ request.user.first_name }}</span>
+          <form method="post" action="{% url 'logout' %}">{% csrf_token %}<button type="submit" class="brand-bg brand-bg-hover text-white px-4 py-2 rounded-lg text-sm font-semibold">Logout</button></form>
+        </div>
+      </div>
     </div>
   </nav>
 
   <div class="flex">
-    <!-- Sidebar -->
-    <aside class="w-64 min-h-screen bg-gray-900 text-white shadow-lg p-6 hidden md:block">
-      <div class="mb-10">
-        <h2 class="text-2xl font-bold mb-1">Welcome</h2>
-        <p class="text-sm text-gray-400">{{ request.user.username }}</p>
+    <aside id="sidebar" class="hidden lg:block w-64 min-h-[calc(100vh-4rem)] text-white shadow-lg" style="background-color: var(--brand);">
+      <div class="p-6">
+        <nav class="space-y-2 text-sm">
+          <a href="{% url 'dashboard' %}" class="flex items-center gap-2 px-4 py-3 w-full rounded-lg border border-white/30 hover:bg-white/10 text-white/90">📊 Dashboard</a>
+          <a href="{% url 'add_expense' %}" class="flex items-center gap-2 px-4 py-3 w-full rounded-lg bg-white text-green-700 font-medium">➕ Add Expense</a>
+          <a href="{% url 'reports' %}" class="flex items-center gap-2 px-4 py-3 w-full rounded-lg border border-white/30 hover:bg-white/10 text-white/90">📈 Reports</a>
+          <a href="{% url 'my_submissions' %}" class="flex items-center gap-2 px-4 py-3 w-full rounded-lg border border-white/30 hover:bg-white/10 text-white/90">📝 My Submissions</a>
+          <a href="{% url 'invoice_generator' %}" class="flex items-center gap-2 px-4 py-3 w-full rounded-lg border border-white/30 hover:bg-white/10 text-white/90">🧾 Invoice Generator</a>
+        </nav>
       </div>
-      <nav class="space-y-4 text-sm">
-        <a href="{% url 'dashboard' %}" class="flex items-center gap-2 px-4 py-2 rounded-lg bg-white bg-opacity-10 hover:bg-opacity-20 transition">
-          <span>📊</span> Dashboard
-        </a>
-        <a href="{% url 'add_expense' %}" class="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-white hover:bg-opacity-20 transition">
-          <span>➕</span> Add Expense
-        </a>
-        <a href="{% url 'reports' %}" class="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-white hover:bg-opacity-20 transition">
-          <span>📈</span> Reports
-        </a>
-        <a href="{% url 'my_submissions' %}" class="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-white hover:bg-opacity-20 transition">
-          <span>📁</span> My Submissions
-        </a>
-        <form method="post" action="{% url 'logout' %}">
-          {% csrf_token %}
-          <button type="submit" class="w-full text-left flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-white hover:bg-opacity-20 text-red-300 hover:text-white transition">
-            <span>🚪</span> Logout
-          </button>
-        </form>
-      </nav>
     </aside>
 
-    <!-- Main Content -->
     <main class="flex-1 p-6">
-      <div class="bg-white p-8 rounded-xl shadow-xl">
-        <div class="flex items-center justify-between mb-6">
-          <h2 class="text-2xl font-bold text-indigo-600">Submit New Expense</h2>
-          <a href="{% url 'dashboard' %}" class="text-sm text-indigo-500 hover:underline">← Back to Dashboard</a>
-        </div>
+      <div class="bg-white dark:bg-gray-800 p-8 rounded-xl shadow ring-1 ring-gray-200 dark:ring-white/10">
+        <h2 class="text-2xl font-bold brand-text mb-6">New Expense</h2>
 
-        <form class="space-y-6" method="POST" enctype="multipart/form-data">
+        <form id="expenseForm" class="space-y-6" method="POST" enctype="multipart/form-data">
           {% csrf_token %}
 
           <div>
+            <label class="block text-sm font-medium mb-1">Upload Invoice (PDF, PNG, JPG)</label>
+            <input id="invoiceUpload" name="invoice" type="file" accept=".pdf,.png,.jpg,.jpeg" class="w-full px-4 py-2 border rounded-md bg-white dark:bg-gray-700">
+          </div>
+
+          <div>
             <label class="block text-sm font-medium mb-1">Expense Title</label>
-            <input name="title" type="text" placeholder="e.g., Client Meeting Lunch" class="w-full py-2 px-3 border rounded-md focus:outline-none" required>
+            <div class="flex items-center gap-2">
+              <input id="title" name="title" type="text" class="flex-1 py-2 px-3 border rounded-md bg-white dark:bg-gray-700" required>
+              <button type="button" class="record-btn h-10 w-10 rounded-md bg-red-600 text-white hover:bg-red-700 flex items-center justify-center transition-all duration-200" data-target="title" title="Click to record voice">
+                <svg class="mic-icon h-5 w-5 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 1v11m0 0a3 3 0 003-3V4a3 3 0 10-6 0v5a3 3 0 003 3z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11v2a7 7 0 01-14 0v-2" /></svg>
+                <svg class="stop-icon h-5 w-5 pointer-events-none hidden" fill="currentColor" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>
+              </button>
+            </div>
           </div>
 
           <div>
             <label class="block text-sm font-medium mb-1">Amount (₹)</label>
-            <input name="amount" type="number" placeholder="e.g., 1500" class="w-full py-2 px-3 border rounded-md focus:outline-none" required>
+            <input id="amount" name="amount" type="number" class="w-full py-2 px-3 border rounded-md bg-white dark:bg-gray-700" required>
           </div>
 
           <div>
             <label class="block text-sm font-medium mb-1">Date</label>
-            <input type="date" name="date" class="w-full py-2 px-3 border rounded-md focus:outline-none" required />
+            <input id="expenseDate" name="date" class="w-full py-2 px-3 border rounded-md bg-white dark:bg-gray-700" required>
           </div>
 
           <div>
             <label class="block text-sm font-medium mb-1">Category</label>
-            <select name="category" class="w-full py-2 px-3 border rounded-md" required>
+            <select id="category" name="category" class="w-full py-2 px-3 border rounded-md bg-white dark:bg-gray-700" required>
               <option disabled selected>Select Category</option>
               <option>Travel</option>
               <option>Meals</option>
@@ -98,24 +121,302 @@
 
           <div>
             <label class="block text-sm font-medium mb-1">Description</label>
-            <textarea name="description" rows="3" placeholder="Optional details..." class="w-full px-4 py-2 border rounded-md"></textarea>
+            <div class="flex items-start gap-2">
+              <textarea id="description" name="description" rows="3" class="flex-1 px-4 py-2 border rounded-md bg-white dark:bg-gray-700"></textarea>
+              <button type="button" class="record-btn h-10 w-10 rounded-md bg-red-600 text-white hover:bg-red-700 flex items-center justify-center transition-all duration-200" data-target="description" title="Click to record voice">
+                <svg class="mic-icon h-5 w-5 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 1v11m0 0a3 3 0 003-3V4a3 3 0 10-6 0v5a3 3 0 003 3z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11v2a7 7 0 01-14 0v-2" /></svg>
+                <svg class="stop-icon h-5 w-5 pointer-events-none hidden" fill="currentColor" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>
+              </button>
+            </div>
+            <p class="text-xs text-gray-500 mt-1">🎤 Click mic to start recording. Click again (■) to stop and transcribe.</p>
           </div>
 
-          <div>
-            <label class="block text-sm font-medium mb-1">Upload Invoice (PDF, PNG, JPG)</label>
-            <input name="invoice" type="file" accept=".pdf,.png,.jpg,.jpeg" class="w-full px-4 py-2 border rounded-md">
-          </div>
-
-          <div>
-            <button type="submit" class="w-full py-2 bg-indigo-600 text-white font-semibold rounded-md hover:bg-indigo-700">
-              Submit Expense
-            </button>
-          </div>
+          <button type="submit" class="w-full py-2 brand-bg brand-bg-hover text-white font-semibold rounded-md">Submit Expense</button>
         </form>
       </div>
     </main>
   </div>
 
-  <script>feather.replace();</script>
+  <!-- Recording Indicator -->
+  <div id="recordIndicator" class="hidden fixed bottom-6 right-6 z-50 bg-white dark:bg-gray-800 border dark:border-gray-600 px-4 py-3 rounded-lg shadow-lg flex items-center gap-3">
+    <span id="recordDot" class="h-3 w-3 rounded-full bg-red-500 animate-pulse"></span>
+    <span id="recordText" class="text-sm font-medium">Recording...</span>
+    <span id="recordTimer" class="text-xs text-gray-500 ml-2">0s</span>
+  </div>
+
+  <script>
+    // 1. DATE PICKER
+    flatpickr("#expenseDate", { dateFormat: "Y-m-d", maxDate: "today" });
+
+    // 2. INVOICE AUTO-MAP
+    document.getElementById('invoiceUpload').addEventListener('change', function() {
+        const file = this.files[0];
+        if (!file) return;
+        const formData = new FormData();
+        formData.append('invoice', file);
+        
+        fetch("{% url 'auto_map_invoice' %}", {
+            method: 'POST',
+            body: formData,
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.items && data.items.length > 0) {
+                const item = data.items[0];
+                document.getElementById('title').value = item.title || '';
+                document.getElementById('description').value = item.description || '';
+                document.getElementById('amount').value = item.amount || '';
+                document.getElementById('expenseDate').value = item.date || '';
+                alert("Invoice data mapped!");
+            } else {
+                alert("No data found in invoice.");
+            }
+        })
+        .catch(err => {
+            console.error("Invoice mapping error:", err);
+            alert("Error processing invoice.");
+        });
+    });
+
+    // 3. SPEECH TO TEXT LOGIC (Fixed & Enhanced)
+    const recordButtons = document.querySelectorAll('.record-btn');
+    const indicator = document.getElementById('recordIndicator');
+    const recordText = document.getElementById('recordText');
+    const recordDot = document.getElementById('recordDot');
+    const recordTimer = document.getElementById('recordTimer');
+    
+    let mediaRecorder = null;
+    let audioChunks = [];
+    let activeButton = null;
+    let recordingStream = null;
+    let timerInterval = null;
+    let recordingSeconds = 0;
+
+    function updateIndicator(state, message) {
+        indicator.classList.remove('hidden');
+        recordText.textContent = message;
+        
+        if (state === 'recording') {
+            recordDot.classList.add('animate-pulse', 'bg-red-500');
+            recordDot.classList.remove('bg-yellow-500');
+        } else if (state === 'processing') {
+            recordDot.classList.remove('animate-pulse', 'bg-red-500');
+            recordDot.classList.add('bg-yellow-500');
+        } else {
+            indicator.classList.add('hidden');
+        }
+    }
+
+    function startTimer() {
+        recordingSeconds = 0;
+        recordTimer.textContent = '0s';
+        timerInterval = setInterval(() => {
+            recordingSeconds++;
+            recordTimer.textContent = `${recordingSeconds}s`;
+        }, 1000);
+    }
+
+    function stopTimer() {
+        if (timerInterval) {
+            clearInterval(timerInterval);
+            timerInterval = null;
+        }
+    }
+
+    function updateButtonState(btn, state) {
+        const micIcon = btn.querySelector('.mic-icon');
+        const stopIcon = btn.querySelector('.stop-icon');
+        
+        btn.classList.remove('recording', 'processing', 'bg-red-600', 'bg-green-600', 'bg-yellow-500');
+        
+        if (state === 'recording') {
+            btn.classList.add('recording');
+            micIcon.classList.add('hidden');
+            stopIcon.classList.remove('hidden');
+        } else if (state === 'processing') {
+            btn.classList.add('processing', 'bg-yellow-500');
+            micIcon.classList.remove('hidden');
+            stopIcon.classList.add('hidden');
+        } else {
+            btn.classList.add('bg-red-600');
+            micIcon.classList.remove('hidden');
+            stopIcon.classList.add('hidden');
+        }
+    }
+
+    function resetAllButtons() {
+        recordButtons.forEach(btn => updateButtonState(btn, 'idle'));
+    }
+
+    async function processAudio(audioBlob, targetInput, btn) {
+        updateIndicator('processing', 'Processing audio...');
+        updateButtonState(btn, 'processing');
+        
+        const formData = new FormData();
+        formData.append('audio', audioBlob, 'recording.webm');
+        
+        console.log('Sending audio blob:', audioBlob.size, 'bytes');
+        
+        try {
+            const response = await fetch("{% url 'speech_to_text' %}", {
+                method: 'POST',
+                body: formData
+            });
+            
+            console.log('Response status:', response.status);
+            
+            const result = await response.json();
+            console.log('Server response:', result);
+            
+            if (result.status === 'success' && result.text) {
+                // Append or set the transcribed text
+                const existingText = targetInput.value.trim();
+                targetInput.value = existingText 
+                    ? existingText + ' ' + result.text 
+                    : result.text;
+                
+                // Visual feedback
+                targetInput.style.backgroundColor = '#d1fae5';
+                setTimeout(() => {
+                    targetInput.style.backgroundColor = '';
+                }, 1000);
+                
+            } else if (result.status === 'empty') {
+                alert('No speech detected. Please try again and speak clearly.');
+            } else {
+                alert('Transcription error: ' + (result.error || result.message || 'Unknown error'));
+            }
+        } catch (err) {
+            console.error('Fetch error:', err);
+            alert('Network error. Please check your connection and try again.');
+        } finally {
+            updateIndicator('hidden', '');
+            updateButtonState(btn, 'idle');
+        }
+    }
+
+    recordButtons.forEach(btn => {
+        btn.addEventListener('click', async () => {
+            const targetId = btn.getAttribute('data-target');
+            const targetInput = document.getElementById(targetId);
+
+            // If currently recording with THIS button, stop it
+            if (mediaRecorder && mediaRecorder.state === 'recording' && activeButton === btn) {
+                console.log('Stopping recording...');
+                mediaRecorder.stop();
+                stopTimer();
+                return;
+            }
+
+            // If recording with ANOTHER button, stop that first
+            if (mediaRecorder && mediaRecorder.state === 'recording') {
+                mediaRecorder.stop();
+                stopTimer();
+                resetAllButtons();
+            }
+
+            // Start new recording
+            try {
+                console.log('Requesting microphone access...');
+                
+                const stream = await navigator.mediaDevices.getUserMedia({ 
+                    audio: {
+                        channelCount: 1,
+                        sampleRate: 16000,
+                        echoCancellation: true,
+                        noiseSuppression: true
+                    } 
+                });
+                
+                console.log('Microphone access granted');
+                recordingStream = stream;
+                
+                // Use a compatible MIME type
+                let mimeType = 'audio/webm';
+                if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) {
+                    mimeType = 'audio/webm;codecs=opus';
+                }
+                
+                mediaRecorder = new MediaRecorder(stream, { mimeType });
+                audioChunks = [];
+                activeButton = btn;
+
+                mediaRecorder.ondataavailable = (event) => {
+                    console.log('Data available:', event.data.size, 'bytes');
+                    if (event.data.size > 0) {
+                        audioChunks.push(event.data);
+                    }
+                };
+                
+                mediaRecorder.onstop = async () => {
+                    console.log('Recording stopped, chunks:', audioChunks.length);
+                    
+                    // Stop all tracks to release microphone
+                    if (recordingStream) {
+                        recordingStream.getTracks().forEach(track => track.stop());
+                        recordingStream = null;
+                    }
+                    
+                    if (audioChunks.length === 0) {
+                        alert('No audio recorded. Please try again.');
+                        updateIndicator('hidden', '');
+                        updateButtonState(btn, 'idle');
+                        return;
+                    }
+                    
+                    const audioBlob = new Blob(audioChunks, { type: mimeType });
+                    console.log('Created blob:', audioBlob.size, 'bytes');
+                    
+                    if (audioBlob.size < 1000) {
+                        alert('Recording too short. Please hold the button longer and speak clearly.');
+                        updateIndicator('hidden', '');
+                        updateButtonState(btn, 'idle');
+                        return;
+                    }
+                    
+                    await processAudio(audioBlob, targetInput, btn);
+                    activeButton = null;
+                };
+
+                mediaRecorder.onerror = (event) => {
+                    console.error('MediaRecorder error:', event.error);
+                    alert('Recording error: ' + event.error.message);
+                    resetAllButtons();
+                    updateIndicator('hidden', '');
+                };
+
+                // Start recording with timeslice for better data availability
+                mediaRecorder.start(1000); // Collect data every second
+                console.log('Recording started');
+                
+                updateButtonState(btn, 'recording');
+                updateIndicator('recording', 'Recording... Speak now');
+                startTimer();
+
+            } catch (err) {
+                console.error('Microphone error:', err);
+                
+                if (err.name === 'NotAllowedError') {
+                    alert('Microphone access denied. Please allow microphone access in your browser settings.');
+                } else if (err.name === 'NotFoundError') {
+                    alert('No microphone found. Please connect a microphone and try again.');
+                } else {
+                    alert('Could not access microphone: ' + err.message);
+                }
+                
+                resetAllButtons();
+                updateIndicator('hidden', '');
+            }
+        });
+    });
+
+    // Cleanup on page unload
+    window.addEventListener('beforeunload', () => {
+        if (recordingStream) {
+            recordingStream.getTracks().forEach(track => track.stop());
+        }
+        stopTimer();
+    });
+  </script>
 </body>
 </html>

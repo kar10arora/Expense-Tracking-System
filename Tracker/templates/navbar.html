@@ -8,6 +8,4 @@
     {% endif %}
     {% if user.profile.role == 'custom_admin' or user.profile.role == 'finance' %}
       <a href="{% url 'approve' %}">Approve Expenses</a>
-    {% endif %}
-    <a href="{% url 'logout' %}">Logout</a>
   </nav>

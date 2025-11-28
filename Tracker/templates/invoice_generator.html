@@ -1,0 +1,158 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" class="h-full" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="color-scheme" content="light dark" />
+  <title>Invoice Generator | Team Expense Tracker</title>
+  <link href="{% static 'css/tailwind.min.css' %}" rel="stylesheet" />
+  <link rel="stylesheet" href="{% static 'css/chart-fixes.css' %}">
+  <script src="{% static 'js/chart.min.js' %}"></script>
+  <link href="https://fonts.cdnfonts.com/css/mona-sans" rel="stylesheet" />
+  <style>
+    :root { --brand:#075131; }
+    body { font-family: 'Mona-Sans', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Apple Color Emoji', 'Segoe UI Emoji'; }
+    .brand-bg { background-color: var(--brand); }
+    .brand-bg-hover:hover { background-color: #06412a; }
+    .brand-text { color: var(--brand); }
+    .brand-border { border-color: var(--brand); }
+  </style>
+</head>
+<body class="min-h-screen h-full bg-gray-50 text-gray-900 dark:bg-gray-900 dark:text-gray-100 antialiased">
+
+      <!-- Navbar -->
+  <nav id="appHeader" class="sticky top-0 z-50 bg-white/90 backdrop-blur border-b border-gray-200 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="h-16 flex items-center justify-between">
+        <button id="sidebarToggle" class="lg:hidden inline-flex items-center justify-center h-9 w-9 rounded-lg border border-gray-300 bg-white text-gray-700 mr-2">
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+        </button>
+        <a href="{% url 'dashboard' %}" class="flex items-center gap-3 group">
+          <span class="inline-flex h-9 w-9 items-center justify-center rounded-lg brand-bg text-white shadow-sm group-hover:shadow transition">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M9 17v-2a4 4 0 014-4h5a4 4 0 014 4v2" />
+              <path d="M3 7a4 4 0 014-4h10a4 4 0 014 4v10a4 4 0 01-4 4H7a4 4 0 01-4-4V7z" />
+            </svg>
+          </span>
+          <span class="text-lg font-semibold tracking-tight">Team Expense Tracker</span>
+        </a>
+        <div class="flex items-center gap-3">
+          <!-- <button id="themeToggle" type="button" class="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition" aria-pressed="false" aria-label="Toggle dark mode">
+            <span class="hidden sm:inline">Theme</span>
+            <svg id="themeIcon" class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3a1 1 0 011 1v2a1 1 0 11-2 0V4a1 1 0 011-1zm0 14a4 4 0 100-8 4 4 0 000 8zm7-5a1 1 0 110-2h2a1 1 0 110 2h-2zM3 12a1 1 0 100-2H1a1 1 0 100 2h2zm15.364 6.364a1 1 0 10-1.414-1.414l-1.415 1.414a1 1 0 101.415 1.415l1.414-1.415zM7.05 7.05A1 1 0 108.465 5.636L7.05 4.222A1 1 0 105.636 5.636L7.05 7.05zm0 9.9l-1.414 1.414A1 1 0 106.05 19.78L7.464 18.364A1 1 0 107.05 16.95z"/></svg>
+          </button> -->
+          <span class="hidden sm:block text-sm font-medium">👤 {{ request.user.first_name }}</span>
+          <form method="post" action="{% url 'logout' %}">
+            {% csrf_token %}
+            <button type="submit" class="inline-flex items-center rounded-lg brand-bg brand-bg-hover text-white px-4 py-2 text-sm font-semibold shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-800 transition" aria-label="Logout">
+              Logout
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <div class="flex">
+    <!-- Sidebar -->
+    <aside id="sidebar" class="hidden lg:block w-64 min-h-[calc(100vh-4rem)] text-white shadow-lg" style="background-color: var(--brand);">
+      <div class="p-6">
+        <!-- <div class="mb-8">
+          <h2 class="text-xl font-semibold">Welcome</h2>
+          <p class="text-sm text-gray-400">{{ request.user.first_name }}</p>
+        </div> -->
+        <nav class="space-y-2 text-sm">
+          <a href="{% url 'dashboard' %}" class="flex items-center gap-2 px-4 py-3 w-full rounded-lg border border-white/30 transition {% if request.resolver_match.url_name == 'dashboard' %}bg-white text-green-700 font-medium{% else %}hover:bg-white/10 text-white/90{% endif %}">
+            <span>📊</span> Dashboard
+          </a>
+          <a href="{% url 'add_expense' %}" class="flex items-center gap-2 px-4 py-3 w-full rounded-lg border border-white/30 transition {% if request.resolver_match.url_name == 'add_expense' %}bg-white text-green-700 font-medium{% else %}hover:bg-white/10 text-white/90{% endif %}">
+            <span>➕</span> Add Expense
+          </a>
+          <a href="{% url 'reports' %}" class="flex items-center gap-2 px-4 py-3 w-full rounded-lg border border-white/30 transition {% if request.resolver_match.url_name == 'reports' %}bg-white text-green-700 font-medium{% else %}hover:bg-white/10 text-white/90{% endif %}">
+            <span>📈</span> Reports
+          </a>
+          <a href="{% url 'my_submissions' %}" class="flex items-center gap-2 px-4 py-3 w-full rounded-lg border border-white/30 transition {% if request.resolver_match.url_name == 'my_submissions' %}bg-white text-green-700 font-medium{% else %}hover:bg-white/10 text-white/90{% endif %}">
+            <span>📁</span> My Submissions
+          </a>
+          <a href="{% url 'invoice_generator' %}" class="flex items-center gap-2 px-4 py-3 w-full rounded-lg border border-white/30 transition {% if request.resolver_match.url_name == 'invoice_generator' %}bg-white text-green-700 font-medium{% else %}hover:bg-white/10 text-white/90{% endif %}">
+            <span>🧾</span> Invoice Generator
+          </a>
+        </nav>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1">
+      <div class="max-w-7xl mx-auto p-6 lg:p-10">
+        <div class="mb-6">
+          <h1 class="text-3xl font-bold tracking-tight">Invoice Generator</h1>
+          <p class="mt-1 text-gray-600 dark:text-gray-300">Create and manage professional invoices for your expenses.</p>
+        </div>
+
+        <!-- Invoice Generator Container -->
+        <div class="rounded-xl bg-white dark:bg-gray-800 p-5 shadow ring-1 ring-gray-200 dark:ring-white/10">
+          <h3 class="text-base font-semibold mb-4">React Invoice Generator</h3>
+          <!-- Embed React Invoice Generator Here -->
+          <div id="root"></div>
+        </div>
+
+                 <!-- React Static Files -->
+         <link rel="icon" href="{% static 'invoice_generator/favicon.ico' %}"/>
+         <link rel="apple-touch-icon" href="{% static 'invoice_generator/logo192.png' %}"/>
+         <link rel="manifest" href="{% static 'invoice_generator/manifest.json' %}"/>
+         <link href="{% static 'invoice_generator/static/css/main.67f8da8b.css' %}" rel="stylesheet">
+         <script defer="defer" src="{% static 'invoice_generator/static/js/main.47d61b36.js' %}"></script>
+       </div>
+     </main>
+   </div>
+ 
+   <!-- Scripts -->
+   <script src="{% static 'js/charts.js' %}"></script>
+   <script>
+     (function() {
+       const root = document.documentElement;
+       const stored = localStorage.getItem('theme');
+       const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+       const isDark = stored ? stored === 'dark' : prefersDark;
+       root.classList.toggle('dark', isDark);
+       window.addEventListener('DOMContentLoaded', function() {
+         const btn = document.getElementById('themeToggle');
+         if (!btn) return;
+         btn.setAttribute('aria-pressed', String(root.classList.contains('dark')));
+         btn.addEventListener('click', function() {
+           const nowDark = !root.classList.contains('dark');
+           root.classList.toggle('dark', nowDark);
+           localStorage.setItem('theme', nowDark ? 'dark' : 'light');
+           this.setAttribute('aria-pressed', String(nowDark));
+         });
+       });
+     })();
+ 
+     // Header background on scroll
+     (function() {
+       const header = document.getElementById('appHeader');
+       const onScroll = () => {
+         if (window.scrollY > 10) {
+           header.classList.add('bg-white','shadow-md');
+         } else {
+           header.classList.remove('bg-white','shadow-md');
+         }
+       };
+       window.addEventListener('scroll', onScroll, { passive: true });
+       onScroll();
+     })();
+ 
+     // Sidebar toggle (mobile)
+     (function() {
+       const toggle = document.getElementById('sidebarToggle');
+       const sidebar = document.getElementById('sidebar');
+       if (!toggle || !sidebar) return;
+       toggle.addEventListener('click', () => {
+         sidebar.classList.toggle('hidden');
+       });
+     })();
+   </script>
+ 
+ </body>
+</html>
