@@ -1,2 +1,7 @@
 venv/
 venv_windows/
+**/venv/
+**/venv_windows/
+*.dll
+*.lib
+.DS_Store
